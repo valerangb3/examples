@@ -6,10 +6,10 @@ class ShopProduct {
     public $price = 0;
 
     function __construct(
-        $title,
-        $firstName,
-        $mainName,
-        $price
+        string $title,
+        string $firstName,
+        string $mainName,
+        float $price
     ) {
         $this->title = $title;
         $this->producerFirstName = $firstName;
@@ -27,11 +27,22 @@ class ShopProduct {
     }
 }
 
+class ShopProductWriter {
+    public function write(ShopProduct $shopProduct) {
+        $str = $shopProduct->title . ": "
+            . $shopProduct->getProducer()
+            . " (" . $shopProduct->price . ")\n";
+        print $str;
+    }
+}
+
 $product1 = new ShopProduct(
     "Собачье сердце",
     "Михаил",
     "Булгаков",
-    5.99
+    "5.99"
 );
 
-print "Автор: {$product1->getProducer()}\n";
+(new ShopProductWriter())->write($product1);
+
+// print "Автор: {$product1->getProducer()}\n";
