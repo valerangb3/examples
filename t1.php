@@ -1,54 +1,85 @@
 <?php
 class CdProduct extends ShopProduct {
+    public $playLength;
+
+    public function __construct(
+        string $title,
+        string $firstName,
+        string $mainName,
+        float $price,
+        int $playLength
+    ) {
+        parent::__construct(
+            $title,
+            $firstName,
+            $mainName,
+            $price
+        );
+        $this->playLength = $playLength;
+    }
 
     public function getPlayLength() {
         return $this->playLength;
     }
 
     public function getSummaryLine() {
-        $base = "{$this->title} ( {$this->producerMainName}, ";
-        $base .= "{$this->producerFirstName} )";
+        $base = parent::getSummaryLine();
         $base .= ": Время звучания - {$this->playLength}";
         return $base;
     }
 }
 
 class BookProduct extends ShopProduct {
+    public $numPages;
+
+    public function __construct(
+        string $title,
+        string $firstName,
+        string $mainName,
+        float $price,
+        int $numPages
+    ) {
+        parent::__construct(
+            $title,
+            $firstName,
+            $mainName,
+            $price
+        );
+        $this->numPages = $numPages;
+    }
 
     public function getNumPages() {
         return $this->numPages;
     }
 
     public function getSummaryLine() {
-        $base = "{$this->title} ( {$this->producerMainName}, ";
-        $base .= "{$this->producerFirstName} )";
+        $base = parent::getSummaryLine();
         $base .= ": {$this->numPages} стр.";
         return $base;
+    }
+
+    public function getPrice() {
+        return $this->price;
     }
 }
 
 class ShopProduct {
-    public $numPages;
-    public $playLength;
     public $title;
     public $producerMainName;
     public $producerFirstName;
-    public $price;
+    protected $price;
+    public $discount = 0;
 
-    function __construct(
+    public function __construct(
         string $title,
         string $firstName,
         string $mainName,
         float $price,
-        int $numPages = 0,
-        int $playLength = 0,
     ) {
         $this->title = $title;
         $this->producerFirstName = $firstName;
         $this->producerMainName = $mainName;
         $this->price = $price;
-        $this->numPages = $price;
-        $this->playLength = $playLength;
     }
 
     public function getProducer() {
@@ -60,6 +91,14 @@ class ShopProduct {
         $base = "{$this->title} ( {$this->producerMainName}, ";
         $base .= "{$this->producerFirstName} )";
         return $base;
+    }
+
+    public function setDiscount(int $num) {
+        $this->discount = $num;
+    }
+
+    public function getPrice() {
+        return $this->price - $this->discount;
     }
 }
 
@@ -84,12 +123,19 @@ $product2 = new CdProduct(
     "Антонио",
     "Вивальди",
     "5.99",
-    "0",
     "55.35"
 );
+
+$product1->setDiscount(2);
+$product2->setDiscount(3);
+
 // (new ShopProductWriter())->write($product1);
 
-print "Автор: {$product1->getProducer()}\n";
-print "Автор: {$product2->getProducer()}\n";
+// print "{$product1->getSummaryLine()}\n";
+// print "{$product2->getSummaryLine()}\n";
+
+print "Цена товара - {$product1->getPrice()}\n";
+print "Цена товара - {$product2->getPrice()}\n";
+
 // print "Количество страниц: {$product1->getNumPages()}стр.\n";
 // print "{$product1->getSummaryLine()}\n";
