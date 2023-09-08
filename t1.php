@@ -1,6 +1,6 @@
 <?php
 class CdProduct extends ShopProduct {
-    public $playLength;
+    private $playLength;
 
     public function __construct(
         string $title,
@@ -30,7 +30,7 @@ class CdProduct extends ShopProduct {
 }
 
 class BookProduct extends ShopProduct {
-    public $numPages;
+    private $numPages;
 
     public function __construct(
         string $title,
@@ -64,11 +64,11 @@ class BookProduct extends ShopProduct {
 }
 
 class ShopProduct {
-    public $title;
-    public $producerMainName;
-    public $producerFirstName;
+    private $title;
+    private $producerMainName;
+    private $producerFirstName;
     protected $price;
-    public $discount = 0;
+    private $discount = 0;
 
     public function __construct(
         string $title,
@@ -80,6 +80,22 @@ class ShopProduct {
         $this->producerFirstName = $firstName;
         $this->producerMainName = $mainName;
         $this->price = $price;
+    }
+
+    public function getTitle() {
+        return $this->title;
+    }
+
+    public function getProducerMainName() {
+        return $this->producerMainName;
+    }
+
+    public function getProducerFirstName() {
+        return $this->producerFirstName;
+    }
+    
+    public function getDiscount() {
+        return $this->discount;
     }
 
     public function getProducer() {
@@ -103,10 +119,19 @@ class ShopProduct {
 }
 
 class ShopProductWriter {
-    public function write(ShopProduct $shopProduct) {
-        $str = $shopProduct->title . ": "
-            . $shopProduct->getProducer()
-            . " (" . $shopProduct->price . ")\n";
+    private $products = [];
+
+    public function addProduct(ShopProduct $shopProduct) {
+        $this->products[] = $shopProduct;
+    }
+
+    public function write() {
+        $str = "";
+        foreach ($this->products as $shopProduct) {
+            $str .= $shopProduct->title . ": ";
+            $str .= $shopProduct->getProducer();
+            $str .= " (" . $shopProduct->getPrice() . ")\n";
+        }
         print $str;
     }
 }
@@ -129,13 +154,15 @@ $product2 = new CdProduct(
 $product1->setDiscount(2);
 $product2->setDiscount(3);
 
+$spw = new ShopProductWriter();
+$spw->addProduct($product1);
+$spw->addProduct($product2);
+$spw->write();
+
 // (new ShopProductWriter())->write($product1);
 
 // print "{$product1->getSummaryLine()}\n";
 // print "{$product2->getSummaryLine()}\n";
-
-print "Цена товара - {$product1->getPrice()}\n";
-print "Цена товара - {$product2->getPrice()}\n";
 
 // print "Количество страниц: {$product1->getNumPages()}стр.\n";
 // print "{$product1->getSummaryLine()}\n";
