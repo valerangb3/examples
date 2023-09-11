@@ -70,6 +70,8 @@ class ShopProduct {
     protected $price;
     private $discount = 0;
 
+    private $id = 0;
+
     public function __construct(
         string $title,
         string $firstName,
@@ -80,6 +82,48 @@ class ShopProduct {
         $this->producerFirstName = $firstName;
         $this->producerMainName = $mainName;
         $this->price = $price;
+    }
+
+    public function setID(int $id) {
+        $this->id = $id;
+    }
+
+    public static function getInstance(int $id, \PDO $pdo) {
+        $stmt = $pdo->prepare("select * from products where id=?");
+        $stmt->execute([$id]);
+        $row = $stmt->fetch();
+        if (empty($row)) {
+            return null;
+        }
+        
+        if ($row["type"] === "cd") {
+            $product = new CdProduct(
+                $row["title"],
+                $row["firstname"],
+                $row["mainname"],
+        (float) $row["price"],
+          (int) $row["playlength"]
+            );
+        } elseif ($row["type"] === "book") {
+            $product = new BookProduct(
+                $row["title"],
+                $row["firstname"],
+                $row["mainname"],
+        (float) $row["price"],
+          (int) $row["numpages"]
+            );
+        } else {
+            $firstName = (is_null($row["firstname"])) ? "" : $row["firstname"];
+            $product = new ShopProduct(
+                $row["title"],
+                $firstName,
+                $row["mainname"],
+        (float) $row["price"],
+            );
+        }
+        $product->setID($row["id"]);
+        $product->setDiscount($row["discount"]);
+        return $product;
     }
 
     public function getTitle() {
@@ -150,7 +194,7 @@ $product2 = new CdProduct(
     "5.99",
     "55.35"
 );
-
+/*
 $product1->setDiscount(2);
 $product2->setDiscount(3);
 
@@ -158,11 +202,12 @@ $spw = new ShopProductWriter();
 $spw->addProduct($product1);
 $spw->addProduct($product2);
 $spw->write();
-
-// (new ShopProductWriter())->write($product1);
-
-// print "{$product1->getSummaryLine()}\n";
-// print "{$product2->getSummaryLine()}\n";
-
-// print "Количество страниц: {$product1->getNumPages()}стр.\n";
-// print "{$product1->getSummaryLine()}\n";
+*/
+$pdo = new PDO(
+    "sqlite:" . __DIR__ . "/db",
+    null,
+    null,
+    [PDO::ATTR_PERSISTENT => true]
+);
+$product = ShopProduct::getInstance(4, $pdo);
+// print $product->getProducer() . "\n";
