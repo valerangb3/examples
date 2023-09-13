@@ -162,21 +162,44 @@ class ShopProduct {
     }
 }
 
-class ShopProductWriter {
-    private $products = [];
+abstract class ShopProductWriter {
+    protected $products = [];
 
     public function addProduct(ShopProduct $shopProduct) {
         $this->products[] = $shopProduct;
     }
 
+    abstract public function write();
+
+}
+
+class TextProductWriter extends ShopProductWriter {
     public function write() {
-        $str = "";
+        $str = "ТОВАРЫ:\n";
         foreach ($this->products as $shopProduct) {
-            $str .= $shopProduct->title . ": ";
-            $str .= $shopProduct->getProducer();
-            $str .= " (" . $shopProduct->getPrice() . ")\n";
+            $str .= $shopProduct->getSummaryLine() . "\n";
         }
         print $str;
+    }
+}
+
+class XmlProductWriter extends ShopProductWriter {
+    public function write() {
+        $writer = new \XMLWriter();
+        $writer->openMemory();
+        $writer->startDocument("1.0", "UTF-8");
+        $writer->startElement("products");
+        foreach ($this->products as $shopProduct) {
+            $writer->startElement("product");
+            $writer->writeAttribute("title", $shopProduct->getTitle());
+            $writer->startElement("summary");
+            $writer->text($shopProduct->getSummaryLine());
+            $writer->endElement(); //summary
+            $writer->endElement(); //product
+        }
+        $writer->endElement(); // products
+        $writer->endDocument();
+        print $writer->flush();
     }
 }
 
@@ -194,6 +217,10 @@ $product2 = new CdProduct(
     "5.99",
     "55.35"
 );
+$spw = new XmlProductWriter();
+$spw->addProduct($product1);
+$spw->addProduct($product2);
+$spw->write();
 /*
 $product1->setDiscount(2);
 $product2->setDiscount(3);
