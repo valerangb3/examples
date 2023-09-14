@@ -1,69 +1,25 @@
 <?php
-class CdProduct extends ShopProduct {
-    private $playLength;
+require_once('traits.php');
 
-    public function __construct(
-        string $title,
-        string $firstName,
-        string $mainName,
-        float $price,
-        int $playLength
-    ) {
-        parent::__construct(
-            $title,
-            $firstName,
-            $mainName,
-            $price
-        );
-        $this->playLength = $playLength;
-    }
-
-    public function getPlayLength() {
-        return $this->playLength;
-    }
-
-    public function getSummaryLine() {
-        $base = parent::getSummaryLine();
-        $base .= ": Время звучания - {$this->playLength}";
-        return $base;
-    }
+interface Chargeable {
+    public function getPrice(): float;
 }
 
-class BookProduct extends ShopProduct {
-    private $numPages;
+abstract class ShopProductWriter {
+    protected $products = [];
 
-    public function __construct(
-        string $title,
-        string $firstName,
-        string $mainName,
-        float $price,
-        int $numPages
-    ) {
-        parent::__construct(
-            $title,
-            $firstName,
-            $mainName,
-            $price
-        );
-        $this->numPages = $numPages;
+    public function addProduct(ShopProduct $shopProduct) {
+        $this->products[] = $shopProduct;
     }
 
-    public function getNumPages() {
-        return $this->numPages;
-    }
+    abstract public function write();
 
-    public function getSummaryLine() {
-        $base = parent::getSummaryLine();
-        $base .= ": {$this->numPages} стр.";
-        return $base;
-    }
-
-    public function getPrice() {
-        return $this->price;
-    }
 }
 
-class ShopProduct {
+class ShopProduct implements Chargeable {
+
+    use PriceUtilities, IdentityTrait;
+
     private $title;
     private $producerMainName;
     private $producerFirstName;
@@ -157,20 +113,73 @@ class ShopProduct {
         $this->discount = $num;
     }
 
-    public function getPrice() {
+    public function getPrice():float {
         return $this->price - $this->discount;
     }
 }
 
-abstract class ShopProductWriter {
-    protected $products = [];
+class CdProduct extends ShopProduct {
+    private $playLength;
 
-    public function addProduct(ShopProduct $shopProduct) {
-        $this->products[] = $shopProduct;
+    public function __construct(
+        string $title,
+        string $firstName,
+        string $mainName,
+        float $price,
+        int $playLength
+    ) {
+        parent::__construct(
+            $title,
+            $firstName,
+            $mainName,
+            $price
+        );
+        $this->playLength = $playLength;
     }
 
-    abstract public function write();
+    public function getPlayLength() {
+        return $this->playLength;
+    }
 
+    public function getSummaryLine() {
+        $base = parent::getSummaryLine();
+        $base .= ": Время звучания - {$this->playLength}";
+        return $base;
+    }
+}
+
+class BookProduct extends ShopProduct {
+    private $numPages;
+
+    public function __construct(
+        string $title,
+        string $firstName,
+        string $mainName,
+        float $price,
+        int $numPages
+    ) {
+        parent::__construct(
+            $title,
+            $firstName,
+            $mainName,
+            $price
+        );
+        $this->numPages = $numPages;
+    }
+
+    public function getNumPages() {
+        return $this->numPages;
+    }
+
+    public function getSummaryLine() {
+        $base = parent::getSummaryLine();
+        $base .= ": {$this->numPages} стр.";
+        return $base;
+    }
+
+    public function getPrice():float {
+        return $this->price;
+    }
 }
 
 class TextProductWriter extends ShopProductWriter {
@@ -203,6 +212,16 @@ class XmlProductWriter extends ShopProductWriter {
     }
 }
 
+
+$product1 = new ShopProduct(
+    "Нежное мыло",
+    "",
+    "Ванная Боба",
+    1.33,
+);
+print $product1->calculateTax(100) . "\n";
+print $product1->generateId() . "\n";
+/*
 $product1 = new BookProduct(
     "Собачье сердце",
     "Михаил",
@@ -221,7 +240,7 @@ $spw = new XmlProductWriter();
 $spw->addProduct($product1);
 $spw->addProduct($product2);
 $spw->write();
-/*
+
 $product1->setDiscount(2);
 $product2->setDiscount(3);
 
@@ -229,7 +248,7 @@ $spw = new ShopProductWriter();
 $spw->addProduct($product1);
 $spw->addProduct($product2);
 $spw->write();
-*/
+
 $pdo = new PDO(
     "sqlite:" . __DIR__ . "/db",
     null,
@@ -237,4 +256,4 @@ $pdo = new PDO(
     [PDO::ATTR_PERSISTENT => true]
 );
 $product = ShopProduct::getInstance(4, $pdo);
-// print $product->getProducer() . "\n";
+*/
