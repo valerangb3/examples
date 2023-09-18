@@ -25,6 +25,7 @@ class ShopProduct implements Chargeable {
     private $producerFirstName;
     protected $price;
     private $discount = 0;
+    private $taxrate = 17;
 
     private $id = 0;
 
@@ -115,6 +116,10 @@ class ShopProduct implements Chargeable {
 
     public function getPrice():float {
         return $this->price - $this->discount;
+    }
+
+    public function getTaxRate(): float {
+        return $this->taxrate;
     }
 }
 
@@ -220,8 +225,9 @@ $product1 = new ShopProduct(
     1.33,
 );
 print $product1->calculateTax(100) . "\n";
-print $product1->generateId() . "\n";
 /*
+print $product1->generateId() . "\n";
+
 $product1 = new BookProduct(
     "Собачье сердце",
     "Михаил",
